@@ -15,7 +15,7 @@ const map = new mapboxgl.Map({
 const svg = d3.select('#map').select('svg');
 
 function getCoords(station) {
-  const point = new mapboxgl.LngLat(+station.Long, +station.Lat);
+  const point = new mapboxgl.LngLat(+station.Lon, +station.Lat);
   const { x, y } = map.project(point);
   return { cx: x, cy: y };
 }
@@ -135,3 +135,4 @@ map.on('load', async () => {
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
 });
+const svg = d3.select('#map').append('svg');
