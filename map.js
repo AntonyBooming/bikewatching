@@ -89,6 +89,7 @@ map.on('load', async () => {
   let jsonData;
   try {
     jsonData = await d3.json('https://dsc106.com/labs/lab07/data/bluebikes-stations.json');
+    console.log(jsonData.data.stations[0]); // ADD HERE
   } catch (error) {
     console.error('Error loading JSON:', error);
   }
@@ -134,6 +135,4 @@ map.on('load', async () => {
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
-
-console.log(jsonData.data.stations[0]);
 });
