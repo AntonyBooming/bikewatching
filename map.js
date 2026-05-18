@@ -45,6 +45,7 @@ function computeStationTraffic(stations, trips) {
 let stations = [];
 let trips = [];
 let circles;
+let jsonData;
 
 function updatePositions() {
   circles
@@ -53,7 +54,6 @@ function updatePositions() {
 }
 
 map.on('load', async () => {
-  // Boston bike lanes
   map.addSource('boston_route', {
     type: 'geojson',
     data: 'https://bostonopendata-boston.opendata.arcgis.com/datasets/boston::existing-bike-network-2022.geojson',
@@ -69,7 +69,6 @@ map.on('load', async () => {
     },
   });
 
-  // Cambridge bike lanes
   map.addSource('cambridge_route', {
     type: 'geojson',
     data: 'https://raw.githubusercontent.com/cambridgegis/cambridgegis_data/main/Recreation/Bike_Facilities/RECREATION_BikeFacilities.geojson',
@@ -85,16 +84,12 @@ map.on('load', async () => {
     },
   });
 
-  // Fetch station data
-  let jsonData;
   try {
     jsonData = await d3.json('https://dsc106.com/labs/lab07/data/bluebikes-stations.json');
-    console.log(jsonData.data.stations[0]); // ADD HERE
   } catch (error) {
     console.error('Error loading JSON:', error);
   }
 
-  // Fetch traffic data
   trips = await d3.csv(
     'https://dsc106.com/labs/lab07/data/bluebikes-traffic-2024-03.csv',
     (trip) => {
@@ -110,8 +105,6 @@ map.on('load', async () => {
     .scaleSqrt()
     .domain([0, d3.max(stations, (d) => d.totalTraffic)])
     .range([0, 25]);
-
-  const svg = d3.select('#map').select('svg');
 
   circles = svg
     .selectAll('circle')
@@ -135,4 +128,45 @@ map.on('load', async () => {
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
+});
+
+const timeFilter = document.getElementById('time-filter');
+const timeDisplay = document.getElementById('time-display');
+
+function minutesToTime(minutes) {
+  const hours = Math.floor(minutes / 60) % 24;
+  const mins = minutes % 60;
+  const period = hours < 12 ? 'AM' : 'PM';
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${String(mins).padStart(2, '0')} ${period}`;
+}
+
+function filterTrips(timeValue) {
+  if (timeValue === -1) return trips;
+  return trips.filter((trip) => {
+    const startMinutes = trip.started_at.getHours() * 60 + trip.started_at.getMinutes();
+    const endMinutes = trip.ended_at.getHours() * 60 + trip.ended_at.getMinutes();
+    return startMinutes <= timeValue && endMinutes >= timeValue - 60;
+  });
+}
+
+timeFilter.addEventListener('input', () => {
+  const value = +timeFilter.value;
+  if (value === -1) {
+    timeDisplay.innerHTML = '<em>(any time)</em>';
+  } else {
+    timeDisplay.textContent = minutesToTime(value);
+  }
+
+  const filteredTrips = filterTrips(value);
+  const filteredStations = computeStationTraffic(jsonData.data.stations, filteredTrips);
+
+  const radiusScale = d3
+    .scaleSqrt()
+    .domain([0, d3.max(filteredStations, (d) => d.totalTraffic)])
+    .range([0, 25]);
+
+  circles
+    .data(filteredStations)
+    .attr('r', (d) => radiusScale(d.totalTraffic));
 });
