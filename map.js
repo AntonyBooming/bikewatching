@@ -30,6 +30,16 @@ map.on('load', async () => {
     },
   });
 
+  // Fetch bike station data
+  let jsonData;
+  try {
+    const jsonurl = 'https://dsc106.com/labs/lab07/data/bluebikes-stations.json';
+    jsonData = await d3.json(jsonurl);
+    console.log('Loaded JSON Data:', jsonData);
+  } catch (error) {
+    console.error('Error loading JSON:', error);
+  }
+
   // Cambridge bike lanes
   map.addSource('cambridge_route', {
     type: 'geojson',
