@@ -134,4 +134,6 @@ map.on('load', async () => {
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);
   map.on('moveend', updatePositions);
+
+console.log(jsonData.data.stations[0]);
 });
