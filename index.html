@@ -11,8 +11,18 @@
     <script src="map.js" type="module"></script>
   </head>
   <body>
-    <h1>🚲 Bikewatching</h1>
-    <p>Visualizing bike lanes and stations in Boston and Cambridge.</p>
-    <div id="map"></div>
+    <header>
+      <h1>🚲 Bikewatching</h1>
+      <label>
+        Filter by time:
+        <input type="range" id="time-filter" min="-1" max="1440" value="-1" />
+        <time id="time-display">
+          <em>(any time)</em>
+        </time>
+      </label>
+    </header>
+    <div id="map">
+      <svg></svg>
+    </div>
   </body>
 </html>
